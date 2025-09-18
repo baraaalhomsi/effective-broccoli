@@ -1,7 +1,13 @@
 # effective-broccoli
 
-
 ## Lab1
+
 ### task 1
+
 ```python
-print("hello world")
+name = input('Имя: ')
+age = int(input('Возраст: '))
+print(f'Привет, {name}! Через год тебе будет {age+1}.')
+```
+
+![anything](Pictures/ex01.png)
