@@ -61,3 +61,36 @@ else:
  ```
 
  ![alt text](image-3.png)  ![alt text](image-4.png)
+
+ ### ex05
+
+ ```python
+ print("your name is: ")
+name=str(input())
+length=len(name)
+def first_letters(names):
+    nnn=names.split()
+    the_basic_part= [n[0] for n in nnn if n]
+    return '.'.join(the_basic_part)
+print("short name:",first_letters(name))
+print("length(symbols):",length)
+```
+
+![alt text](image-5.png)
+
+### ex06
+
+```python
+n = int(input())
+ochno=0
+zaochno=0
+for _ in range(n):
+    surname, name, age, form = input().split()
+    if form == "True":
+        ochno+=1
+    else:
+        zaochno+=1
+print(ochno, zaochno)
+```
+
+![alt text](image-6.png)
