@@ -10,7 +10,7 @@ age = int(input('Возраст: '))
 print(f'Привет, {name}! Через год тебе будет {age+1}.')
 ```
 
-![alt text](image.png)
+![alt text](./images/lab01/image.png)
 
 ### ex02
 
@@ -25,7 +25,7 @@ print("sum= ",f"{sum:.2f}")
 print("avg= ",f"{avg:.2f}")
 ```
 
-![alt text](image-1.png)
+![alt text](./images/lab01/image-1.png)
 
 ### ex03
 
@@ -44,7 +44,7 @@ print("vat_amount: ",f"{vat_amount:.2f}")
 print("the final price: ",f"{total:.2f}")
 ```
 
-![alt text](image-2.png)
+![alt text](./images/lab01/image-2.png)
 
 ### ex04
 
@@ -60,23 +60,23 @@ else:
      print(f"{b:02}:{c:02}")
  ```
 
- ![alt text](image-3.png)  ![alt text](image-4.png)
+ ![alt text](./images/lab01/image-3.png)  ![alt text](./images/lab01/image-4.png)
 
  ### ex05
 
  ```python
- print("your name is: ")
+print("your name is: ")
 name=str(input())
-length=len(name)
 def first_letters(names):
-    nnn=names.split()
+    nnn=name.split()
     the_basic_part= [n[0] for n in nnn if n]
     return '.'.join(the_basic_part)
+length=len(name.replace(" ", ""))
 print("short name:",first_letters(name))
 print("length(symbols):",length)
 ```
 
-![alt text](image-5.png)
+![alt text](./images/lab01/imagee.png)
 
 ### ex06
 
@@ -93,4 +93,4 @@ for _ in range(n):
 print(ochno, zaochno)
 ```
 
-![alt text](image-6.png)
+![alt text](./images/lab01/image-6.png)
