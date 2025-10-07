@@ -113,4 +113,4 @@ def min_max(nums: list[float | int]) -> tuple[float | int, float | int]:
     return (min_val, max_val)
     ```
 
-    ![alt text](./images/lab01/image-6.png)
+<img width="683" height="205" alt="array01" src="https://github.com/user-attachments/assets/c8801e6c-ab77-4a90-bf39-1eb5a338b294" />
