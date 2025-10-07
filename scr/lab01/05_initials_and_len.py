@@ -6,4 +6,4 @@ def first_letters(names):
     return '.'.join(the_basic_part)
 length=len(name.replace(" ", ""))
 print("short name:",first_letters(name))
-print("length(symbols):",length)
+print("length(symbols):",length) 

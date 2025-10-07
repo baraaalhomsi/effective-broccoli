@@ -94,3 +94,23 @@ print(ochno, zaochno)
 ```
 
 ![alt text](./images/lab01/image-6.png)
+
+## Lab2
+
+### ex A
+
+```python
+def min_max(nums: list[float | int]) -> tuple[float | int, float | int]:
+    if not nums:
+        raise ValueError("the array is empty")
+    min_val = nums[0]
+    max_val = nums[0]
+    for num in nums:
+        if num < min_val:
+            min_val = num
+        if num > max_val:
+            max_val = num
+    return (min_val, max_val)
+    ```
+
+    ![alt text](./images/lab01/image-6.png)
