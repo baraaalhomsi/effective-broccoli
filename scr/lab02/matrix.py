@@ -13,11 +13,16 @@ def transpose(mat: list[list[float | int]]) -> list[list]:
             new_row.append(mat[row_index][col_index])
         transpose.append(new_row)
     return transpose
-"""print(transpose([[1, 2, 3]]))
+
+print("transpose: ")
+print(transpose([[1, 2, 3]]))
 print(transpose([[1], [2], [3]]))
 print(transpose([[1, 2], [3, 4]]))
 print(transpose([[]]))
-print(transpose([[1, 2], [3]]))"""
+try:
+    print(transpose([[1, 2], [3]]))
+except Exception as e:
+    print(f"ValueError: {e}","\n")
 
 def row_sums(mat: list[list[float | int]]) -> list[float]:
     cols=len(mat[0])
@@ -33,10 +38,14 @@ def row_sums(mat: list[list[float | int]]) -> list[float]:
         new_mat.append(row_sum)
     return new_mat
 
-"""print(row_sums([[1, 2, 3], [4, 5, 6]]))
+print("row_sums: ")
+print(row_sums([[1, 2, 3], [4, 5, 6]]))
 print(row_sums([[-1, 1], [10, -10]]))
 print(row_sums([[0, 0], [0, 0]]))
-print(row_sums([[1, 2], [3]]))"""
+try:
+    print(row_sums([[1, 2], [3]]))
+except Exception as e:
+    print(f"ValueError: {e}","\n")
 
 def col_sums(mat: list[list[float | int]]) -> list[float]:
     cols=len(mat[0])
@@ -52,7 +61,11 @@ def col_sums(mat: list[list[float | int]]) -> list[float]:
         new_mat.append(col_sum)
     return new_mat
 
-"""print(col_sums([[1, 2, 3], [4, 5, 6]]))
+print("col_sums: ")
+print(col_sums([[1, 2, 3], [4, 5, 6]]))
 print(col_sums([[-1, 1], [10, -10]]))
 print(col_sums([[0, 0], [0, 0]]))
-print(col_sums([[1, 2], [3]]))"""
+try:
+    print(col_sums([[1, 2], [3]]) )
+except Exception as e:
+    print(f"ValueError: {e}")
