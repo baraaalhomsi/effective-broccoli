@@ -3,6 +3,17 @@
 ## Описание
 Реализация модуля для обработки текста и анализа частот слов с поддержкой табличного вывода.
 
+## Структура проекта
+
+```
+src/
+├── lib/
+│   └── text.py           # Модуль с функциями для работы с текстом
+└── lab03/
+    ├── text_stats.py      # Скрипт для анализа текста из stdin
+    └── README.md          # Этот файл
+```
+
 ### заданиe A
 ```python
 import re
@@ -53,27 +64,27 @@ def top_n(freq: Dict[str, int], n: int = 5) -> List[Tuple[str, int]]:
     items.sort(key=lambda x: (-x[1], x[0]))
     
     return items[:n]
+if __name__ == "__main__":
+    print("===normalize===")
+    print(normalize("ПрИвЕт\nМир\t"))
+    print(normalize("ёжик, Ёлка"))
+    print(normalize("Hello\r\nWorld"))
+    print(normalize("  двойные   пробелы  ",),"\n")
 
-print("===normalize===")
-print(normalize("ПрИвЕт\nМир\t"))
-print(normalize("ёжик, Ёлка"))
-print(normalize("Hello\r\nWorld"))
-print(normalize("  двойные   пробелы  ",),"\n")
+    print("===tokenizee===")
+    print(tokenize("привет мир"))
+    print(tokenize("hello,world!!!"))
+    print(tokenize("по-настоящему круто"))
+    print(tokenize("2025 год"))
+    print(tokenize("emoji 😀 не слово"),"\n")
 
-print("===tokenizee===")
-print(tokenize("привет мир"))
-print(tokenize("hello,world!!!"))
-print(tokenize("по-настоящему круто"))
-print(tokenize("2025 год"))
-print(tokenize("emoji 😀 не слово"),"\n")
-
-print("===count_freq + top_n===")
-freq=count_freq(["a","b","a","c","b","a"])
-print(freq)
-print(top_n(freq, n=2))
-freq2=count_freq(["bb","aa","bb","aa","cc"])
-print(freq2)
-print(top_n(freq2, n=2),"\n")
+    print("===count_freq + top_n===")
+    freq=count_freq(["a","b","a","c","b","a"])
+    print(freq)
+    print(top_n(freq, n=2))
+    freq2=count_freq(["bb","aa","bb","aa","cc"])
+    print(freq2)
+    print(top_n(freq2, n=2),"\n")
 ```
 
 ![alt text](/images/lab03/A.png)
