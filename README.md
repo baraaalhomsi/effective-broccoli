@@ -287,7 +287,6 @@ python_labs/
  ││   └── text.py
  │└── lab04/
  │├── io_txt_csv.py
- │├── text_report.py
  │└── text_report_advanced.py
  ├──data/
  │├── lab04/
@@ -354,85 +353,20 @@ if __name__ == "__main__":
         print(f"[Error writing CSV] {e}")
 ```
 
-![alt text](/images/lab04/image1.png)  ![alt text](/images/lab04/image2.png)
+![alt text](/images/lab04/image1.png)  ![alt text](/images/lab04/image10.png)
 
-![alt text](/images/lab04/image3.png)  ![alt text](/images/lab04/image9.png)
+![alt text](/images/lab04/image3.png)  ![alt text](/images/lab04/image2.png)
 
-### Задание B — скрипт src/lab04/text_report.py
+### Задание B — скрипт src/lab04/text_report_advanced.py
 
 ```python
 import sys
 import argparse
 from pathlib import Path
 from typing import List, Dict, Tuple
-from collections import Counter
 
-try:
-    from src.lab04.io_txt_csv import read_text, write_csv
-    from src.lib.text import normalize, tokenize, count_freq, top_n
-except ImportError:
-    import csv
-    import re
-    from collections import defaultdict
-
-    def read_text(path, encoding="utf-8"):
-
-        file_path = Path(path)
-        with open(file_path, 'r', encoding=encoding) as f:
-            return f.read()
-
-    def write_csv(rows, path, header=None):
-
-        file_path = Path(path)
-        file_path.parent.mkdir(parents=True, exist_ok=True)
-
-        if rows:
-            expected_len = len(rows[0])
-            for i, row in enumerate(rows):
-                if len(row) != expected_len:
-                    raise ValueError(f"Row {i} has {len(row)} items, expected {expected_len}")
-
-        with open(file_path, 'w', newline='', encoding='utf-8') as f:
-            writer = csv.writer(f)
-            if header:
-                writer.writerow(header)
-            writer.writerows(rows)
-
-    def normalize(text: str, *, casefold: bool = True, yo_to_e: bool = True) -> str:
-
-        if not text:
-            return ""
-
-        processed = text
-        if casefold:
-            processed = processed.casefold()
-        if yo_to_e:
-            processed = processed.replace('ё', 'е').replace('Ё', 'Е')
-
-        processed = re.sub(r'[\t\r\n\v\f]+', ' ', processed)
-        processed = re.sub(r' +', ' ', processed).strip()
-
-        return processed
-
-    def tokenize(text: str) -> List[str]:
-
-        if not text:
-            return []
-        token_pattern = r'[a-zа-яё0-9_]+(?:-[a-zа-яё0-9_]+)*'
-        return re.findall(token_pattern, text, flags=re.IGNORECASE)
-
-    def count_freq(tokens: List[str]) -> Dict[str, int]:
-
-        counter = defaultdict(int)
-        for t in tokens:
-            counter[t] += 1
-        return dict(counter)
-
-    def top_n(freq_dict: Dict[str, int], limit: int = 5) -> List[Tuple[str, int]]:
-
-        sorted_items = sorted(freq_dict.items(), key=lambda x: (-x[1], x[0]))
-        return sorted_items[:limit]
-
+from io_txt_csv import read_text_file, save_to_csv
+from scr.lib.text import normalize, tokenize, count_freq, top_n
 
 # === Processing functions ===
 
@@ -478,12 +412,13 @@ def print_pretty_table(word_freq: Dict[str, int]):
 def main_single(input_file: str, output_file: str, encoding: str = "utf-8"):
 
     try:
-        text = read_text(input_file, encoding)
+        text = read_text_file(input_file, encoding)
         word_freq = process_text(text)
         total_words = sum(word_freq.values())
+
         sorted_words = top_n(word_freq, len(word_freq))
         rows = [(word, str(count)) for word, count in sorted_words]
-        write_csv(rows, output_file, header=("word", "count"))
+        save_to_csv(rows, output_file, header=("word", "count"))
 
         print_summary(word_freq, total_words)
         print_pretty_table(word_freq)
@@ -498,13 +433,13 @@ def main_single(input_file: str, output_file: str, encoding: str = "utf-8"):
 
 
 def main_multiple(input_files: List[str], per_file_output: str, total_output: str, encoding: str = "utf-8"):
-
-    all_freq = {}
+    """Processes multiple files and generates both per-file and total reports."""
+    all_freq: Dict[str, int] = {}
     per_file_data = []
 
     for file in input_files:
         try:
-            text = read_text(file, encoding)
+            text = read_text_file(file, encoding)
             word_freq = process_text(text)
 
             for word, count in word_freq.items():
@@ -519,11 +454,11 @@ def main_multiple(input_files: List[str], per_file_output: str, total_output: st
             sys.exit(1)
 
     per_file_data.sort(key=lambda x: (x[0], -int(x[2]), x[1]))
-    write_csv(per_file_data, per_file_output, header=("file", "word", "count"))
+    save_to_csv(per_file_data, per_file_output, header=("file", "word", "count"))
 
     sorted_total = top_n(all_freq, len(all_freq))
     total_rows = [(word, str(count)) for word, count in sorted_total]
-    write_csv(total_rows, total_output, header=("word", "count"))
+    save_to_csv(total_rows, total_output, header=("word", "count"))
 
     total_words = sum(all_freq.values())
     print_summary(all_freq, total_words)
@@ -531,7 +466,6 @@ def main_multiple(input_files: List[str], per_file_output: str, total_output: st
 
     print(f"\nPer-file report saved to: {per_file_output}")
     print(f"Total summary report saved to: {total_output}")
-
 
 def main():
     parser = argparse.ArgumentParser(description='Word frequency report generator.')
@@ -567,4 +501,7 @@ if __name__ == "__main__":
 ![alt text](/images/lab04/image4.png)  ![alt text](/images/lab04/image5.png)
 
 ![alt text](/images/lab04/image6.png)  ![alt text](/images/lab04/image7.png)
-![alt text](/images/lab04/image8.png)
+![alt text](/images/lab04/image8.png)   
+
+### by click "Run"(works with file input.txt)
+![alt text](/images/lab04/image9.png)
