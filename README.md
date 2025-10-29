@@ -365,7 +365,7 @@ import argparse
 from pathlib import Path
 from typing import List, Dict, Tuple
 
-from io_txt_csv import read_text_file, save_to_csv
+from scr.lb04.io_txt_csv import read_text_file, save_to_csv
 from scr.lib.text import normalize, tokenize, count_freq, top_n
 
 # === Processing functions ===
@@ -433,7 +433,7 @@ def main_single(input_file: str, output_file: str, encoding: str = "utf-8"):
 
 
 def main_multiple(input_files: List[str], per_file_output: str, total_output: str, encoding: str = "utf-8"):
-    """Processes multiple files and generates both per-file and total reports."""
+
     all_freq: Dict[str, int] = {}
     per_file_data = []
 

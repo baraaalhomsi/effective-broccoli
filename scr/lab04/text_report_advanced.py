@@ -1,12 +1,10 @@
 import sys
-import os
 import argparse
 from pathlib import Path
 from typing import List, Dict, Tuple
-sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
-from io_txt_csv import read_text_file, save_to_csv
-from .lib.text import normalize, tokenize, count_freq, top_n
+from scr.lab04.io_txt_csv import read_text_file, save_to_csv
+from scr.lib.text import normalize, tokenize, count_freq, top_n
 
 # === Processing functions ===
 
