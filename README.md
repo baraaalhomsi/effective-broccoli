@@ -681,3 +681,159 @@ if __name__ == "__main__":
 ![alt text](/images/lab05/B1.png)
 ![alt text](/images/lab05/B2.png)
 ![alt text](/images/lab05/B3.png)
+
+## lab06 — CLI‑утилиты с argparse (cat/grep‑lite + конвертеры): Техническое задание
+
+### 1- reading and printing the text \ or counting and frequency of word (cli_text.py)
+
+```python
+import argparse
+import sys
+import os
+from pathlib import Path
+from scr.lib.text import normalize, tokenize, count_freq, top_n
+
+def read_file_lines(file_path):
+    """Read file and return list of lines"""
+    with open(file_path, 'r', encoding='utf-8') as file:
+        return file.readlines()
+
+def cat_command(input_file, number_lines=False):
+    """Execute cat command"""
+    lines = read_file_lines(input_file)
+    
+    for i, line in enumerate(lines, 1):
+        if number_lines:
+            print(f"{i:6d}.\t{line.rstrip()}")
+        else:
+            print(line.rstrip())
+
+def stats_command(input_file, n=5):
+    """Execute stats command"""
+    with open(input_file, 'r', encoding='utf-8') as file:
+        text = file.read()
+    
+    # Use functions from lab03
+    normalized_text = normalize(text)
+    tokens = tokenize(normalized_text)
+    frequencies = count_freq(tokens)
+    top_words = top_n(frequencies, n)
+    
+    print(f"Top {n} most frequent words:")
+    print("-" * 30)
+    for i, (word, count) in enumerate(top_words, 1):
+        print(f"{i:2d}. {word:<8} :{count:3d} times")
+
+def main():
+    parser = argparse.ArgumentParser(
+        description="Text processing tools - File display and word statistics"
+    )
+    subparsers = parser.add_subparsers(dest="command", help="Available commands")
+    
+    cat_parser = subparsers.add_parser("cat", help="Display file content")
+    cat_parser.add_argument("--input", required=True, help="Input file path")
+    cat_parser.add_argument("-n", action="store_true", help="Number lines")
+    
+    stats_parser = subparsers.add_parser("stats", help="Word frequency statistics")
+    stats_parser.add_argument("--input", required=True, help="Input text file path")
+    stats_parser.add_argument("--top", type=int, default=20, help="Number of top words (default: 20)")
+    
+    args = parser.parse_args()
+    
+    if not args.command:
+        parser.print_help()
+        return
+    
+    if args.command == "cat":
+        cat_command(args.input, args.n)
+    elif args.command == "stats":
+        stats_command(args.input, args.top)
+
+if __name__ == "__main__":
+    main()
+```
+### for printing
+"python -m scr.lab06.cli_text cat --input data/samples/people.csv **or** python -m scr.lab06.cli_text cat --input data/samples/people.csv -n"
+
+![alt text](/images/lab06/1.png)
+
+### for counting
+"python -m scr.lab06.cli_text stats --input data/samples/people.txt --top 12"
+
+![alt text](/images/lab06/2.png)
+
+### 2- CLI‑конвертер
+
+```python
+import argparse
+import sys
+import os
+from pathlib import Path
+from scr.lab05.json_to_csv import json_to_csv, csv_to_json
+from scr.lab05.csv_to_xlsx import csv_to_xlsx
+
+def ensure_directory_exists(file_path):
+
+    directory = os.path.dirname(file_path)
+    if directory and not os.path.exists(directory):
+        os.makedirs(directory, exist_ok=True)
+
+def convert_json_to_csv(input_file, output_file):
+
+    ensure_directory_exists(output_file)
+    json_to_csv(input_file, output_file)
+    print(f"Successfully converted: {input_file} → {output_file}")
+
+def convert_csv_to_json(input_file, output_file):
+
+    ensure_directory_exists(output_file)
+    csv_to_json(input_file, output_file)
+    print(f"Successfully converted: {input_file} → {output_file}")
+
+def convert_csv_to_xlsx(input_file, output_file):
+
+    ensure_directory_exists(output_file)
+    csv_to_xlsx(input_file, output_file)
+    print(f"Successfully converted: {input_file} → {output_file}")
+
+def main():
+    parser = argparse.ArgumentParser(description="Data conversion tools between different formats")
+    subparsers = parser.add_subparsers(dest="command", help="Available conversion commands")
+
+    json2csv_parser = subparsers.add_parser("json2csv", help="Convert JSON to CSV")
+    json2csv_parser.add_argument("--in", dest="input", required=True, help="Input JSON file")
+    json2csv_parser.add_argument("--out", dest="output", required=True, help="Output CSV file")
+
+    csv2json_parser = subparsers.add_parser("csv2json", help="Convert CSV to JSON")
+    csv2json_parser.add_argument("--in", dest="input", required=True, help="Input CSV file")
+    csv2json_parser.add_argument("--out", dest="output", required=True, help="Output JSON file")
+
+    csv2xlsx_parser = subparsers.add_parser("csv2xlsx", help="Convert CSV to XLSX")
+    csv2xlsx_parser.add_argument("--in", dest="input", required=True, help="Input CSV file")
+    csv2xlsx_parser.add_argument("--out", dest="output", required=True, help="Output XLSX file")
+    
+    args = parser.parse_args()
+    
+    if not args.command:
+        parser.print_help()
+        return
+    
+    if args.command == "json2csv":
+        convert_json_to_csv(args.input, args.output)
+    elif args.command == "csv2json":
+        convert_csv_to_json(args.input, args.output)
+    elif args.command == "csv2xlsx":
+        convert_csv_to_xlsx(args.input, args.output)
+
+if __name__ == "__main__":
+    main()
+```
+
+### json to csv
+"python -m scr.lab06.cli_convert json2csv --in data/samples/people.json --out data/out/people.csv"
+### csv to json
+"python -m scr.lab06.cli_convert csv2json --in data/samples/people.csv --out data/out/people.json"
+### csv to xlsx
+"python -m scr.lab06.cli_convert csv2xlsx --in data/samples/people.csv --out data/out/people.xlsx"
+
+![alt text](/images/lab06/3.png)

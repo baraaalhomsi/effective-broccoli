@@ -3,7 +3,7 @@ import os
 
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'lib'))
 
-from text import normalize, tokenize, count_freq, top_n
+from scr.lib.text import normalize, tokenize, count_freq, top_n
 
 def process_text(text: str, table_output: bool = False) -> str:
 

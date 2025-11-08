@@ -5,6 +5,12 @@ from pathlib import Path
 
 def json_to_csv(json_path: str, csv_path: str) -> None:
 
+    if not json_path.lower().endswith('.json'):
+        raise ValueError (f"file {json_path} must to be .json")
+
+    if not csv_path.lower().endswith('.csv'):
+        raise ValueError (f"file {csv_path} must to be .csv")
+
     if not Path(json_path).exists():
         raise FileNotFoundError(f"file {json_path} is not exist")
 
@@ -47,6 +53,12 @@ def json_to_csv(json_path: str, csv_path: str) -> None:
 
 def csv_to_json(csv_path: str, json_path: str) -> None:
 
+    if not csv_path.lower().endswith('.csv'):
+        raise ValueError (f"file {csv_path} must to be .csv")
+        
+    if not json_path.lower().endswith('.json'):
+        raise ValueError (f"file {json_path} must to be .json")
+        
     if not Path(csv_path).exists():
         raise FileNotFoundError(f"file {csv_path} is not exict")
 
@@ -70,9 +82,9 @@ def csv_to_json(csv_path: str, json_path: str) -> None:
 def main():
     try:
 
-        print("converting people.json to CSV...")
-        json_to_csv("data/samples/people.json", "data/out/people_from_json.csv")
-        print("the conversion was successful: people_from_json.csv")
+        # print("converting people.json to CSV...")
+        # json_to_csv("./people1.csv", "data/out/people_from_json.csv")
+        # print("the conversion was successful: people_from_json.csv")
 
         print("converting people.csv to JSON...")
         csv_to_json("data/samples/people.csv", "data/out/people_from_csv.json")
