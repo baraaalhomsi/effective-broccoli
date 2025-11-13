@@ -1,16 +1,15 @@
 import argparse
 import sys
-import os
 from pathlib import Path
 from scr.lib.text import normalize, tokenize, count_freq, top_n
 
 def read_file_lines(file_path):
-    """Read file and return list of lines"""
+
     with open(file_path, 'r', encoding='utf-8') as file:
         return file.readlines()
 
 def cat_command(input_file, number_lines=False):
-    """Execute cat command"""
+
     lines = read_file_lines(input_file)
     
     for i, line in enumerate(lines, 1):
@@ -20,11 +19,10 @@ def cat_command(input_file, number_lines=False):
             print(line.rstrip())
 
 def stats_command(input_file, n=5):
-    """Execute stats command"""
+
     with open(input_file, 'r', encoding='utf-8') as file:
         text = file.read()
-    
-    # Use functions from lab03
+
     normalized_text = normalize(text)
     tokens = tokenize(normalized_text)
     frequencies = count_freq(tokens)
@@ -36,9 +34,7 @@ def stats_command(input_file, n=5):
         print(f"{i:2d}. {word:<8} :{count:3d} times")
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="Text processing tools - File display and word statistics"
-    )
+    parser = argparse.ArgumentParser(description="Text processing tools - File display and word statistics")
     subparsers = parser.add_subparsers(dest="command", help="Available commands")
     
     cat_parser = subparsers.add_parser("cat", help="Display file content")
