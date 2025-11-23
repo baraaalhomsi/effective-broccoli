@@ -10,7 +10,7 @@ def csv_to_xlsx(csv_path: str, xlsx_path: str) -> None:
         raise FileNotFoundError(f"file {csv_path} is not exist")
 
     try:
-        with open(csv_path, 'r', encoding='utf-8') as csv_file:
+        with open(csv_path, "r", encoding="utf-8") as csv_file:
             reader = csv.reader(csv_file)
             rows = list(reader)
     except Exception as e:
@@ -18,22 +18,22 @@ def csv_to_xlsx(csv_path: str, xlsx_path: str) -> None:
 
     if not rows:
         raise ValueError("file CSV is empty")
-    
+
     # to creat the fail if it is not not exist
     Path(xlsx_path).parent.mkdir(parents=True, exist_ok=True)
 
     wb = Workbook()
     ws = wb.active
     ws.title = "Sheet1"
-    
+
     # copy info from CSV to Exel
     for row in rows:
         ws.append(row)
-    
+
     # adjusting width of the colmuns
     for col_num, column in enumerate(ws.columns, 1):
         max_length = 0
-        
+
         # the longest text in te column
         for cell in column:
             try:
@@ -41,7 +41,7 @@ def csv_to_xlsx(csv_path: str, xlsx_path: str) -> None:
                     max_length = len(str(cell.value))
             except:
                 pass
-        
+
         # adjusting width
         adjusted_width = max(8, min(max_length + 2, 50))
         col_letter = get_column_letter(col_num)
@@ -49,17 +49,18 @@ def csv_to_xlsx(csv_path: str, xlsx_path: str) -> None:
 
     wb.save(xlsx_path)
 
+
 def main():
 
     try:
         print("converting people.csv to XLSX...")
         csv_to_xlsx("data/samples/people.csv", "data/out/people.xlsx")
         print("the conversion was successful: people.xlsx")
-        
+
         print("converting cities.csv to XLSX...")
         csv_to_xlsx("data/samples/cities.csv", "data/out/cities.xlsx")
         print("the conversion was successful: cities.xlsx")
-        
+
     except Exception as e:
         print(f"wrong: {e}")
 

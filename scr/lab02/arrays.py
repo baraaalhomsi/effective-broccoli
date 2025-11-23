@@ -9,6 +9,8 @@ def min_max(nums: list[float | int]) -> tuple[float | int, float | int]:
         if num > max_val:
             max_val = num
     return (min_val, max_val)
+
+
 print("min_max: ")
 print(min_max([3, -1, 5, 5, 0]))
 print(min_max([42]))
@@ -19,16 +21,19 @@ try:
 except Exception as e:
     print(f"ValueErorre: {e}\n")
 
+
 def unique_sorted(nums: list[float | int]) -> list[float | int]:
     unique_nums = list(set(nums))
     unique_nums.sort()
     return unique_nums
 
+
 print("unique_sorted: ")
 print(unique_sorted([3, 1, 2, 1, 3]))
 print(unique_sorted([]))
 print(unique_sorted([-1, -1, 0, 2, 2]))
-print(unique_sorted([1.0, 1, 2.5, 2.5, 0]),"\n")
+print(unique_sorted([1.0, 1, 2.5, 2.5, 0]), "\n")
+
 
 def flatten(mat: list[list | tuple]) -> list:
     result = []
@@ -41,6 +46,7 @@ def flatten(mat: list[list | tuple]) -> list:
             else:
                 result.append(element)
     return result
+
 
 print("flatten: ")
 print(flatten([[1, 2], [3, 4]]))

@@ -8,6 +8,7 @@ from scr.lib.text import normalize, tokenize, count_freq, top_n
 
 # === Processing functions ===
 
+
 def process_text(text: str) -> Dict[str, int]:
     normalized = normalize(text)
     tokens = tokenize(normalized)
@@ -70,7 +71,12 @@ def main_single(input_file: str, output_file: str, encoding: str = "utf-8"):
         sys.exit(1)
 
 
-def main_multiple(input_files: List[str], per_file_output: str, total_output: str, encoding: str = "utf-8"):
+def main_multiple(
+    input_files: List[str],
+    per_file_output: str,
+    total_output: str,
+    encoding: str = "utf-8",
+):
 
     all_freq: Dict[str, int] = {}
     per_file_data = []
@@ -88,12 +94,13 @@ def main_multiple(input_files: List[str], per_file_output: str, total_output: st
             print(f"Error: File '{file}' not found.")
             sys.exit(1)
         except UnicodeDecodeError:
-            print(f"Error: Invalid encoding in file '{file}'. Try using --encoding cp1251.")
+            print(
+                f"Error: Invalid encoding in file '{file}'. Try using --encoding cp1251."
+            )
             sys.exit(1)
 
     per_file_data.sort(key=lambda x: (x[0], -int(x[2]), x[1]))
     save_to_csv(per_file_data, per_file_output, header=("file", "word", "count"))
-
 
     sorted_total = top_n(all_freq, len(all_freq))
     total_rows = [(word, str(count)) for word, count in sorted_total]
@@ -106,28 +113,45 @@ def main_multiple(input_files: List[str], per_file_output: str, total_output: st
     print(f"\nPer-file report saved to: {per_file_output}")
     print(f"Total summary report saved to: {total_output}")
 
+
 def main():
-    parser = argparse.ArgumentParser(description='Word frequency report generator.')
-    parser.add_argument('--in', dest='input_files', nargs='+',
-                        default=['data/lab04/input.txt'],
-                        help='Input file(s). Default: data/lab04/input.txt')
-    parser.add_argument('--out', dest='output_file',
-                        default='data/lab04/report.csv',
-                        help='Output CSV file for single-file mode.')
-    parser.add_argument('--per-file', dest='per_file_output',
-                        help='Output CSV file for per-file report.')
-    parser.add_argument('--total', dest='total_output',
-                        help='Output CSV file for total report.')
-    parser.add_argument('--encoding', default='utf-8',
-                        help='File encoding. Default: utf-8.')
+    parser = argparse.ArgumentParser(description="Word frequency report generator.")
+    parser.add_argument(
+        "--in",
+        dest="input_files",
+        nargs="+",
+        default=["data/lab04/input.txt"],
+        help="Input file(s). Default: data/lab04/input.txt",
+    )
+    parser.add_argument(
+        "--out",
+        dest="output_file",
+        default="data/lab04/report.csv",
+        help="Output CSV file for single-file mode.",
+    )
+    parser.add_argument(
+        "--per-file",
+        dest="per_file_output",
+        help="Output CSV file for per-file report.",
+    )
+    parser.add_argument(
+        "--total", dest="total_output", help="Output CSV file for total report."
+    )
+    parser.add_argument(
+        "--encoding", default="utf-8", help="File encoding. Default: utf-8."
+    )
 
     args = parser.parse_args()
 
-    if len(args.input_files) == 1 and not args.per_file_output and not args.total_output:
+    if (
+        len(args.input_files) == 1
+        and not args.per_file_output
+        and not args.total_output
+    ):
         main_single(args.input_files[0], args.output_file, args.encoding)
     else:
-        per_file = args.per_file_output or 'data/lab04/report_per_file.csv'
-        total_file = args.total_output or 'data/lab04/report_total.csv'
+        per_file = args.per_file_output or "data/lab04/report_per_file.csv"
+        total_file = args.total_output or "data/lab04/report_total.csv"
         main_multiple(args.input_files, per_file, total_file, args.encoding)
 
 

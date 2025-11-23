@@ -6,29 +6,34 @@ from typing import Union, Tuple, List
 def read_text_file(path: Union[str, Path], encoding: str = "utf-8") -> str:
 
     file_path = Path(path)
-    
-    with open(file_path, 'r', encoding=encoding) as f:
+
+    with open(file_path, "r", encoding=encoding) as f:
         return f.read()
 
 
-def save_to_csv(data: List[Union[tuple, list]], path: Union[str, Path], 
-                header: Tuple[str, ...] = None) -> None:
+def save_to_csv(
+    data: List[Union[tuple, list]],
+    path: Union[str, Path],
+    header: Tuple[str, ...] = None,
+) -> None:
 
     file_path = Path(path)
     make_parent_dir(file_path)
-    
+
     if data:
         expected_len = len(data[0])
         for i, row in enumerate(data):
             if len(row) != expected_len:
-                raise ValueError(f"Row {i} has length {len(row)}, expected {expected_len}")
-    
-    with open(file_path, 'w', newline='', encoding='utf-8') as f:
-        writer = csv.writer(f, delimiter=',')
-        
+                raise ValueError(
+                    f"Row {i} has length {len(row)}, expected {expected_len}"
+                )
+
+    with open(file_path, "w", newline="", encoding="utf-8") as f:
+        writer = csv.writer(f, delimiter=",")
+
         if header:
             writer.writerow(header)
-        
+
         writer.writerows(data)
 
 

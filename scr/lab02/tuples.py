@@ -23,14 +23,14 @@ def format_record(record):
         raise ValueError("ФИО must contain at least last name and first name")
     last_name = name_parts[0]
     first_names = name_parts[1:]
-    initials = '.'.join(name[0].upper() for name in first_names) + '.'
+    initials = ".".join(name[0].upper() for name in first_names) + "."
     formatted_gpa = f"{gpa:.2f}"
     formatted_result = f"{last_name} {initials}, гр. {group}, GPA {formatted_gpa}"
     return formatted_result
-print("=== format_record ===")   
-print(format_record(("Иванов Иван Иванович", "БИВТ-25", 4.6)))  
-print(format_record(("Петров Пётр", "IKB0-12", 5.0)))  
+
+
+print("=== format_record ===")
+print(format_record(("Иванов Иван Иванович", "БИВТ-25", 4.6)))
+print(format_record(("Петров Пётр", "IKB0-12", 5.0)))
 print(format_record(("Петров Пётр Петрович", "IKB0-12", 5.0)))
 print(format_record(("Сидорова анна аергеевна", "АВВ-01", 3.999)))
-    
- 
