@@ -2,7 +2,7 @@ import pytest
 import json
 import csv
 from pathlib import Path
-from scr.lab05.json_to_csv import json_to_csv, csv_to_json
+from .json_to_csv import json_to_csv, csv_to_json
 
 
 class TestJsonToCsv:
@@ -55,20 +55,6 @@ class TestJsonToCsv:
         with pytest.raises(FileNotFoundError):
             json_to_csv("nonexistent.json", "output.csv")
 
-    def test_csv_to_json_invalid_csv(self, tmp_path: Path):
-        scr = tmp_path / "invalid.csv"
-        dst = tmp_path / "output.json"
-
-        csv_content = """name,age,city
-Alice,22
-Bob,25,London,ExtraColumn
-"""
-
-        scr.write_text(csv_content, encoding="utf-8")
-
-        with pytest.raises(ValueError):
-            csv_to_json(str(scr), str(dst))
-
 
 class TestCsvToJson:
 
@@ -98,6 +84,20 @@ Bob,25,London"""
         dst = tmp_path / "output.json"
 
         scr.write_text("", encoding="utf-8")
+
+        with pytest.raises(ValueError):
+            csv_to_json(str(scr), str(dst))
+
+    def test_csv_to_json_invalid_csv(self, tmp_path: Path):
+        scr = tmp_path / "invalid.csv"
+        dst = tmp_path / "output.json"
+
+        csv_content = """name,age,city
+Alice,22
+Bob,25,London,ExtraColumn
+"""
+
+        scr.write_text(csv_content, encoding="utf-8")
 
         with pytest.raises(ValueError):
             csv_to_json(str(scr), str(dst))

@@ -254,4 +254,10 @@ class TestRoundTrip:
 
 ## Дополнительное задание: покрытие куда
 
-![alt text](/images/lab07/Screenshot%202025-11-23%20184308.png)
+![alt text](/images/lab07/Screenshot%202025-12-03%20202335.png)
+
+![alt text](/images/lab07/Screenshot%202025-12-03%20202310.png)
+
+![alt text](/images/lab07/Screenshot%202025-12-03%20202408.png)
+
+

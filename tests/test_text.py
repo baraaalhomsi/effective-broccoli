@@ -1,5 +1,5 @@
 import pytest
-from scr.lib.text import normalize, tokenize, count_freq, top_n
+from .text import normalize, tokenize, count_freq, top_n
 
 
 class TestNormalize:
