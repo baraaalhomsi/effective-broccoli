@@ -833,3 +833,732 @@ if __name__ == "__main__":
 "python -m scr.lab06.cli_convert csv2xlsx --in data/samples/people.csv --out data/out/people.xlsx"
 
 ![alt text](/images/lab06/3.png)
+
+## ЛР9 — «База данных» на CSV: класс Group, CRUD-операции и CLI
+
+### scr/lab09/group.py
+
+```python
+import csv
+import sys
+import os
+from pathlib import Path
+from typing import List, Optional
+
+current_dir = Path(__file__).parent
+project_root = current_dir.parent
+sys.path.append(str(project_root))
+
+try:
+    from lab08.models import Student
+except ImportError as e:
+    print(f"Import error: {e}")
+    print(f"Current sys.path: {sys.path}")
+    exit(1)
+
+
+class Group:
+    
+    def __init__(self, storage_path: str):
+
+        self.path = Path(storage_path)
+        self._ensure_storage_exists()
+    
+    def _ensure_storage_exists(self) -> None:
+
+        if not self.path.exists():
+            self.path.parent.mkdir(parents=True, exist_ok=True)
+            with open(self.path, 'w', newline='', encoding='utf-8') as f:
+                writer = csv.writer(f)
+                writer.writerow(['fio', 'birthdate', 'group', 'gpa'])
+    
+    def _read_all(self) -> List[dict]:
+
+        with open(self.path, 'r', encoding='utf-8') as f:
+            reader = csv.DictReader(f)
+            return list(reader)
+    
+    def _write_all(self, rows: List[dict]) -> None:
+
+        with open(self.path, 'w', newline='', encoding='utf-8') as f:
+            fieldnames = ['fio', 'birthdate', 'group', 'gpa']
+            writer = csv.DictWriter(f, fieldnames=fieldnames)
+            writer.writeheader()
+            writer.writerows(rows)
+    
+    def list(self) -> List[Student]:
+
+        rows = self._read_all()
+        students = []
+        for row in rows:
+            try:
+
+                row['gpa'] = float(row['gpa'])
+                student = Student(**row)
+                students.append(student)
+            except (ValueError, TypeError) as e:
+                print(f"Warning: Error converting row data: {row} - {e}")
+                continue
+        return students
+    
+    def add(self, student: Student) -> None:
+
+        with open(self.path, 'a', newline='', encoding='utf-8') as f:
+            writer = csv.writer(f)
+            writer.writerow([student.fio, student.birthdate, student.group, student.gpa])
+    
+    def find(self, substr: str) -> List[Student]:
+
+        rows = self._read_all()
+        matching_rows = [r for r in rows if substr.lower() in r["fio"].lower()]
+        
+        students = []
+        for row in matching_rows:
+            try:
+                row['gpa'] = float(row['gpa'])
+                student = Student(**row)
+                students.append(student)
+            except (ValueError, TypeError) as e:
+                print(f"Warning: Error converting row data: {row} - {e}")
+                continue
+        return students
+    
+    def remove(self, fio: str) -> bool:
+
+        rows = self._read_all()
+        initial_count = len(rows)
+
+        rows = [r for r in rows if r["fio"] != fio]
+        
+        if len(rows) < initial_count:
+            self._write_all(rows)
+            return True
+        return False
+    
+    def update(self, fio: str, **fields) -> bool:
+ 
+        rows = self._read_all()
+        updated = False
+        
+        for row in rows:
+            if row["fio"] == fio:
+
+                for field, value in fields.items():
+                    if field in ['fio', 'birthdate', 'group', 'gpa']:
+                        row[field] = str(value)
+                updated = True
+        
+        if updated:
+            self._write_all(rows)
+        return updated
+    
+    # ★ Bonus Task (Optional)
+    def stats(self) -> dict:
+
+        students = self.list()
+        
+        if not students:
+            return {
+                "count": 0,
+                "min_gpa": None,
+                "max_gpa": None,
+                "avg_gpa": None,
+                "groups": {},
+                "top_5_students": []
+            }
+
+        gpas = [s.gpa for s in students]
+        min_gpa = min(gpas)
+        max_gpa = max(gpas)
+        avg_gpa = sum(gpas) / len(gpas)
+
+        groups = {}
+        for student in students:
+            group = student.group
+            groups[group] = groups.get(group, 0) + 1
+        
+        sorted_students = sorted(students, key=lambda s: s.gpa, reverse=True)
+        top_5 = [{"fio": s.fio, "gpa": s.gpa} for s in sorted_students[:5]]
+        
+        return {
+            "count": len(students),
+            "min_gpa": min_gpa,
+            "max_gpa": max_gpa,
+            "avg_gpa": round(avg_gpa, 2),
+            "groups": groups,
+            "top_5_students": top_5
+        }
+```
+
+### scr/lab09/test_group.py 
+
+```python
+import sys
+import os
+from pathlib import Path
+
+current_dir = Path(__file__).parent
+project_root = current_dir.parent
+sys.path.append(str(project_root))
+
+try:
+    from lab08.models import Student
+    from group import Group
+except ImportError as e:
+    print(f"Import error: {e}")
+    print(f"Current sys.path: {sys.path}")
+    exit(1)
+
+def main():
+
+    data_path = "data/lab09/students.csv"
+
+    group = Group(data_path)
+    
+    print("=" * 50)
+    print("Testing Group Class - Student Data Management")
+    print("=" * 50)
+    
+    # 1. Test adding students
+    print("\n1. Adding new students:")
+    
+    students_to_add = [
+        Student("Ahmed Mohamed", "2002-05-14", "SE-01", 4.5),
+        Student("Sara Khalid", "2003-11-22", "SE-02", 3.8),
+        Student("Mohamed Ahmed", "2001-07-30", "SE-01", 4.2),
+        Student("Fatima Ali", "2002-12-10", "SE-02", 4.8),
+        Student("Ali Hassan", "2003-03-25", "SE-03", 3.5),
+        Student("Khalid Mohamed", "2002-08-15", "SE-01", 4.0),
+    ]
+    
+    for student in students_to_add:
+        group.add(student)
+        print(f"  ✓ Added: {student.fio} - {student.group} - GPA: {student.gpa}")
+    
+    # 2. Test listing all students
+    print("\n2. Listing all students:")
+    all_students = group.list()
+    for student in all_students:
+        print(f"  - {student.fio} | {student.birthdate} | {student.group} | {student.gpa}")
+    
+    # 3. Test searching
+    print("\n3. Searching for students with 'Mohamed' in name:")
+    found_students = group.find("Mohamed")
+    for student in found_students:
+        print(f"  ✓ Found: {student.fio} - GPA: {student.gpa}")
+    
+    # 4. Test updating
+    print("\n4. Updating Ahmed Mohamed's GPA to 4.7:")
+    if group.update("Ahmed Mohamed", gpa=4.7):
+        print("  ✓ GPA updated successfully")
+    else:
+        print("  ✗ Student not found")
+    
+    # 5. Test deleting
+    print("\n5. Deleting student 'Ali Hassan':")
+    if group.remove("Ali Hassan"):
+        print("  ✓ Student deleted successfully")
+    else:
+        print("  ✗ Student not found")
+    
+    # 6. Show students after modifications
+    print("\n6. Students after modifications:")
+    updated_students = group.list()
+    for student in updated_students:
+        print(f"  - {student.fio} | {student.group} | GPA: {student.gpa}")
+    
+    # 7. Test statistics (if available)
+    print("\n7. Group statistics:")
+    try:
+        stats = group.stats()
+        print(f"  Student count: {stats['count']}")
+        print(f"  Minimum GPA: {stats['min_gpa']}")
+        print(f"  Maximum GPA: {stats['max_gpa']}")
+        print(f"  Average GPA: {stats['avg_gpa']}")
+        print(f"  Group distribution: {stats['groups']}")
+        print("  Top 5 students:")
+        for i, student in enumerate(stats['top_5_students'], 1):
+            print(f"    {i}. {student['fio']} - GPA: {student['gpa']}")
+    except AttributeError:
+        print("  (Statistics feature not enabled)")
+    
+    print("\n" + "=" * 50)
+    print("Test completed successfully!")
+    print(f"Data saved to: {data_path}")
+    print("=" * 50)
+
+if __name__ == "__main__":
+    main()
+```
+
+### into the terminal
+" python scr/lab09/test_group.py"
+
+![alt text](/images/lab09/Screenshot%202025-12-05%20201928.png)
+
+![alt text](/images/lab09/Screenshot%202025-12-05%20201827.png)
+
+## ЛР10 — Структуры данных: Stack, Queue, Linked List и бенчмарки
+
+### Задание A. Stack и Queue (src/lab10/structures.py)
+
+```python
+from collections import deque
+from typing import Any, Optional
+
+
+class Stack:
+    
+    def __init__(self) -> None:
+
+        self._data: list[Any] = []
+    
+    def push(self, item: Any) -> None:
+
+        self._data.append(item)
+    
+    def pop(self) -> Any:
+
+        if self.is_empty():
+            raise IndexError("not able to remove element from empty Stack")
+        return self._data.pop()
+    
+    def peek(self) -> Optional[Any]:
+
+        if self.is_empty():
+            return None
+        return self._data[-1]
+    
+    def is_empty(self) -> bool:
+
+        return len(self._data) == 0
+    
+    def __len__(self) -> int:
+  
+        return len(self._data)
+    
+    def __str__(self) -> str:
+ 
+        return f"Stack({self._data})"
+    
+    def __repr__(self) -> str:
+      
+        return f"Stack({self._data})"
+
+
+class Queue:
+    
+    def __init__(self) -> None:
+ 
+        self._data: deque[Any] = deque()
+    
+    def enqueue(self, item: Any) -> None:
+
+        self._data.append(item)
+    
+    def dequeue(self) -> Any:
+
+        if self.is_empty():
+            raise IndexError("not able to remove element from empty Queue")
+        return self._data.popleft()
+    
+    def peek(self) -> Optional[Any]: # return the first element
+   
+        if self.is_empty():
+            return None
+        return self._data[0]
+    
+    def is_empty(self) -> bool:
+
+        return len(self._data) == 0
+    
+    def __len__(self) -> int:
+
+        return len(self._data)
+    
+    def __str__(self) -> str:
+
+        return f"Queue({list(self._data)})"
+    
+    def __repr__(self) -> str:
+
+        return f"Queue({list(self._data)})"
+```
+
+### Задание B. SinglyLinkedList (src/lab10/linked_list.py)
+
+```python
+from typing import Any, Optional, Iterator
+
+class Node:
+    
+    def __init__(self, value: Any) -> None:
+
+        self.value: Any = value
+        self.next: Optional['Node'] = None
+    
+    def __str__(self) -> str:
+
+        return f"[{self.value}]"
+    
+    def __repr__(self) -> str:
+
+        return f"Node({self.value})"
+
+
+class SinglyLinkedList:
+    
+    def __init__(self) -> None:
+
+        self.head: Optional[Node] = None
+        self.tail: Optional[Node] = None
+        self._size: int = 0
+    
+    def append(self, value: Any) -> None:
+
+        new_node = Node(value)
+        
+        if self.is_empty():
+            self.head = new_node
+            self.tail = new_node
+        else:
+            self.tail.next = new_node
+            self.tail = new_node
+        
+        self._size += 1
+    
+    def prepend(self, value: Any) -> None:
+
+        new_node = Node(value)
+        
+        if self.is_empty():
+            self.head = new_node
+            self.tail = new_node
+        else:
+            new_node.next = self.head
+            self.head = new_node
+        
+        self._size += 1
+    
+    def insert(self, idx: int, value: Any) -> None:
+
+        if idx < 0 or idx > self._size:
+            raise IndexError(f"the index {idx} out of the range {self._size}]")
+        
+        if idx == 0:
+            self.prepend(value)
+        elif idx == self._size:
+            self.append(value)
+        else:
+            new_node = Node(value)
+            current = self.head
+            for _ in range(idx - 1):
+                current = current.next
+            
+            new_node.next = current.next
+            current.next = new_node
+            self._size += 1
+    
+    def remove(self, value: Any) -> bool:
+
+        if self.is_empty():
+            return False
+        
+        # remove the first element
+        if self.head.value == value:
+            self.head = self.head.next
+            if self.head is None:
+                self.tail = None
+            self._size -= 1
+            return True
+        
+        # find the node that precedes the node to be remove
+        current = self.head
+        while current.next is not None and current.next.value != value:
+            current = current.next
+        
+        # if there is not value
+        if current.next is None:
+            return False
+        
+        # remove the node
+        current.next = current.next.next
+        
+        # uptade the tail if the last element was removed
+        if current.next is None:
+            self.tail = current
+        
+        self._size -= 1
+        return True
+    
+    def remove_at(self, idx: int) -> Any:
+ 
+        if idx < 0 or idx >= self._size:
+            raise IndexError(f"the index {idx} out of the range {self._size - 1}]")
+        
+        if idx == 0:
+            removed_value = self.head.value
+            self.head = self.head.next
+            if self.head is None:
+                self.tail = None
+        else:
+            current = self.head
+            for _ in range(idx - 1):
+                current = current.next
+            
+            removed_value = current.next.value
+            current.next = current.next.next
+            
+            if current.next is None:
+                self.tail = current
+        
+        self._size -= 1
+        return removed_value
+    
+    def search(self, value: Any) -> bool:
+
+        current = self.head
+        while current is not None:
+            if current.value == value:
+                return True
+            current = current.next
+        return False
+    
+    def get(self, idx: int) -> Any:
+
+        if idx < 0 or idx >= self._size:
+            raise IndexError(f"the index {idx} out of the range {self._size - 1}]")
+        
+        current = self.head
+        for _ in range(idx):
+            current = current.next
+        
+        return current.value
+    
+    def is_empty(self) -> bool:
+ 
+        return self._size == 0
+    
+    def __iter__(self) -> Iterator[Any]:
+   
+        current = self.head
+        while current is not None:
+            yield current.value
+            current = current.next
+    
+    def __len__(self) -> int:
+
+        return self._size
+    
+    def __str__(self) -> str:
+     
+        if self.is_empty():
+            return "SinglyLinkedList([])"
+        
+        parts = []
+        current = self.head
+        while current is not None:
+            parts.append(f"[{current.value}]")
+            current = current.next
+        
+        return "SinglyLinkedList(" + " -> ".join(parts) + ")"
+    
+    def __repr__(self) -> str:
+    
+        values = list(self)
+        return f"SinglyLinkedList({values})"
+    
+    def pretty_print(self) -> str:
+       
+        if self.is_empty():
+            return "Empty List"
+        
+        result = []
+        current = self.head
+        while current is not None:
+            result.append(f"[{current.value}]")
+            current = current.next
+        
+        return " -> ".join(result) + " -> None"
+```
+
+### Using (scr\lab10\benchmark.py)
+
+```python
+import time
+import random
+from structures import Stack, Queue
+from linked_list import SinglyLinkedList
+
+def measure_time(func, *args):
+
+    start = time.perf_counter()
+    func(*args)
+    return time.perf_counter() - start
+
+def test_stack_performance():
+
+    print("Testing Stack performance...")
+    
+    # Push test
+    stack = Stack()
+    start = time.perf_counter()
+    for i in range(10000):
+        stack.push(i)
+    push_time = time.perf_counter() - start
+    
+    # Pop test
+    start = time.perf_counter()
+    for _ in range(10000):
+        stack.pop()
+    pop_time = time.perf_counter() - start
+    
+    print(f"  Push 10,000 items: {push_time:.4f}s")
+    print(f"  Pop 10,000 items:  {pop_time:.4f}s")
+    return push_time + pop_time
+
+
+def test_queue_performance():
+
+    print("Testing Queue performance...")
+    
+    queue = Queue()
+    start = time.perf_counter()
+    for i in range(10000):
+        queue.enqueue(i)
+    enqueue_time = time.perf_counter() - start
+    
+    start = time.perf_counter()
+    for _ in range(10000):
+        queue.dequeue()
+    dequeue_time = time.perf_counter() - start
+    
+    print(f"  Enqueue 10,000 items: {enqueue_time:.4f}s")
+    print(f"  Dequeue 10,000 items: {dequeue_time:.4f}s")
+    return enqueue_time + dequeue_time
+
+
+def test_linked_list_performance():
+
+    print("Testing Linked List performance...")
+    
+    sll = SinglyLinkedList()
+    
+    # Append test
+    start = time.perf_counter()
+    for i in range(5000):
+        sll.append(i)
+    append_time = time.perf_counter() - start
+    
+    # Prepend test
+    sll2 = SinglyLinkedList()
+    start = time.perf_counter()
+    for i in range(5000):
+        sll2.prepend(i)
+    prepend_time = time.perf_counter() - start
+    
+    # Search test
+    start = time.perf_counter()
+    for i in range(100):
+        sll.search(random.randint(0, 4999))
+    search_time = time.perf_counter() - start
+    
+    print(f"  Append 5,000 items:  {append_time:.4f}s")
+    print(f"  Prepend 5,000 items: {prepend_time:.4f}s")
+    print(f"  Search 100 items:    {search_time:.4f}s")
+    
+    return append_time + prepend_time + search_time
+
+def compare_all():
+ 
+    print("\n" + "="*50)
+    print("COMPARING ALL DATA STRUCTURES")
+    print("="*50)
+    
+    # Test each structure
+    stack_time = test_stack_performance()
+    print()
+    
+    queue_time = test_queue_performance()
+    print()
+    
+    ll_time = test_linked_list_performance()
+    
+    print("\n" + "="*50)
+    print("SUMMARY")
+    print("="*50)
+    
+    print(f"\nTotal time for operations:")
+    print(f"  Stack:          {stack_time:.4f}s")
+    print(f"  Queue:          {queue_time:.4f}s")
+    print(f"  Linked List:    {ll_time:.4f}s")
+    
+    print(f"\nRelative speed (lower is faster):")
+    fastest = min(stack_time, queue_time, ll_time)
+    print(f"  Stack:          {stack_time/fastest:.2f}x")
+    print(f"  Queue:          {queue_time/fastest:.2f}x")
+    print(f"  Linked List:    {ll_time/fastest:.2f}x")
+
+
+def simple_example():
+
+    print("\n" + "="*50)
+    print("SIMPLE USAGE EXAMPLES")
+    print("="*50)
+    
+    # Stack example
+    print("\n1. Stack Example:")
+    stack = Stack()
+    stack.push("First")
+    stack.push("Second")
+    stack.push("Third")
+    print(f"   Stack: {stack}")
+    print(f"   Pop: {stack.pop()}")
+    print(f"   Peek: {stack.peek()}")
+    
+    # Queue example
+    print("\n2. Queue Example:")
+    queue = Queue()
+    queue.enqueue("Task 1")
+    queue.enqueue("Task 2")
+    queue.enqueue("Task 3")
+    print(f"   Queue: {queue}")
+    print(f"   Dequeue: {queue.dequeue()}")
+    print(f"   Next: {queue.peek()}")
+    
+    # Linked List example
+    print("\n3. Linked List Example:")
+    sll = SinglyLinkedList()
+    sll.append(10)
+    sll.append(20)
+    sll.prepend(5)
+    print(f"   List: {sll}")
+    print(f"   Pretty: {sll.pretty_print()}")
+    print(f"   Length: {len(sll)}")
+
+def main():
+
+    print("SIMPLE DATA STRUCTURE BENCHMARK")
+    print("="*50)
+    
+    # Show examples
+    simple_example()
+    
+    # Run comparison
+    compare_all()
+    
+    print("\n" + "="*50)
+    print("Benchmark Complete!")
+    print("="*50)
+
+if __name__ == "__main__":
+    main()
+```
+
+### into the terminal
+
+"python scr\lab10\benchmark.py"
+
+![alt text](/images/lab10/Screenshot%202025-12-17%20223004.png)
+
+![alt text](/images/lab10/Screenshot%202025-12-17%20230318.png)
